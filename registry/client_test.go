@@ -14,12 +14,13 @@ import (
 func Test_Client_FetchSchema_Success(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(`{
+		_, err := w.Write([]byte(`{
 		"subject":"foobar",
 		"version":1,
 		"id":1,
 		"schema":"{ \"type\": \"record\", \"name\": \"Person\", \"namespace\": \"com.ippontech.kafkatutorials\", \"fields\": [ { \"name\": \"firstName\", \"type\": \"string\" }, { \"name\": \"lastName\", \"type\": \"string\" }, { \"name\": \"birthDate\", \"type\": \"long\" } ]}" }"
 		}`))
+		require.NoError(t, err)
 	}))
 	defer ts.Close()
 
@@ -105,7 +106,8 @@ func Test_Client_FetchSchema_whith_an_unexpected_error(t *testing.T) {
 func Test_Client_FetchSchema_with_an_invalid_response_body(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(`not a json response`))
+		_, err := w.Write([]byte(`not a json response`))
+		require.NoError(t, err)
 	}))
 	defer ts.Close()
 

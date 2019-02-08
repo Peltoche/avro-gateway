@@ -16,7 +16,7 @@ type Client struct {
 	baseURL *url.URL
 }
 
-// NewClient instanciate a new Client.
+// NewClient instantiate a new Client.
 func NewClient(schemaRegistryURL *url.URL) *Client {
 	return &Client{
 		client:  http.DefaultClient,
@@ -37,6 +37,7 @@ func (t *Client) FetchSchema(ctx context.Context, subject string, version string
 		return "", internal.Errorf(internal.InternalError, "failed to generate the path: %s", err)
 	}
 
+	//nolint
 	// Error not possible
 	req, _ := http.NewRequest("GET", t.baseURL.ResolveReference(fetchSchemaPath).String(), nil)
 

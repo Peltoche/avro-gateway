@@ -11,6 +11,7 @@ import (
 	"github.com/Peltoche/schema-gateway/internal"
 	"github.com/gorilla/mux"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func Test_HTTPHandler_Post_success(t *testing.T) {
@@ -35,7 +36,8 @@ func Test_HTTPHandler_Post_success(t *testing.T) {
 	router.ServeHTTP(w, r)
 
 	res := w.Result()
-	body, _ := ioutil.ReadAll(res.Body)
+	body, err := ioutil.ReadAll(res.Body)
+	require.NoError(t, err)
 
 	assert.Equal(t, http.StatusOK, res.StatusCode)
 	assert.Equal(t, "some-schema", string(body))
@@ -56,7 +58,8 @@ func Test_HTTPHandler_Post_with_an_invalid_body_format(t *testing.T) {
 	router.ServeHTTP(w, r)
 
 	res := w.Result()
-	body, _ := ioutil.ReadAll(res.Body)
+	body, err := ioutil.ReadAll(res.Body)
+	require.NoError(t, err)
 
 	assert.Equal(t, http.StatusUnprocessableEntity, res.StatusCode)
 	assert.JSONEq(t, `{
@@ -89,7 +92,8 @@ func Test_HTTPHandler_Post_with_an_error_from_the_usecase(t *testing.T) {
 	router.ServeHTTP(w, r)
 
 	res := w.Result()
-	body, _ := ioutil.ReadAll(res.Body)
+	body, err := ioutil.ReadAll(res.Body)
+	require.NoError(t, err)
 
 	assert.Equal(t, http.StatusUnprocessableEntity, res.StatusCode)
 	assert.JSONEq(t, `{
@@ -122,7 +126,8 @@ func Test_HTTPHandler_Post_with_an_unexpected_error_from_the_usecase(t *testing.
 	router.ServeHTTP(w, r)
 
 	res := w.Result()
-	body, _ := ioutil.ReadAll(res.Body)
+	body, err := ioutil.ReadAll(res.Body)
+	require.NoError(t, err)
 
 	assert.Equal(t, http.StatusInternalServerError, res.StatusCode)
 	assert.JSONEq(t, `{

@@ -3,6 +3,7 @@ package schema
 import (
 	"context"
 	"encoding/json"
+	"log"
 	"net/http"
 
 	"github.com/Peltoche/schema-gateway/internal"
@@ -40,10 +41,6 @@ func (t *HTTPHandler) Post(w http.ResponseWriter, r *http.Request) {
 		Action  string `json:"action"`
 	}
 
-	type responseError struct {
-		Message string `json:"message"`
-	}
-
 	vars := mux.Vars(r)
 
 	var req request
@@ -65,5 +62,8 @@ func (t *HTTPHandler) Post(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(schema))
+	_, err = w.Write([]byte(schema))
+	if err != nil {
+		log.Print(err)
+	}
 }
