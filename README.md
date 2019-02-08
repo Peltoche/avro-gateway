@@ -1,3 +1,5 @@
+[![license](http://img.shields.io/badge/license-Apache%20v2-orange.svg)](https://raw.githubusercontent.com/Peltoche/oaichecker/master/LICENSE)
+
 # Avro Gateway
 
 ## What is it?
