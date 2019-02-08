@@ -11,11 +11,15 @@ any schema versions susceptible to breaking the current clients.
 
 ## Why ?
 
-You have a Kafka topic with some consumers and you want to upgrade the Avro schema
-for you producer. How do you ensure to not break you consumers with a breaking change
-into you schema? Which consumer should you upgrade before?
+You have a Kafka topic which is consumed by some other teams and you want to
+upgrade the Avro schema for you producer. How do you ensure not to break the
+consumers with a breaking change into you schema? Which consumer should you
+upgrade before?
 
 You need to consume a Kafka topic managed by an another team. How do you ensure
-that you current Avro schema version will be able to consume the messages? Which
-version should you use? How do you prevent the other team to make a schema change
-not handled by your consumer?
+that you current Avro schema version will be able to decode the messages? Which
+version should you use? How do you prevent the producer team to make a schema
+change not handled by your consumer?
+
+
+The Avro Gateway aims to resolve those issues.
