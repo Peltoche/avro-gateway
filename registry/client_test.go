@@ -69,7 +69,7 @@ func Test_Client_FetchSchema_with_a_network_error(t *testing.T) {
 	assert.Empty(t, schema)
 }
 
-func Test_Client_FetchSchema_whith_a_schema_not_found(t *testing.T) {
+func Test_Client_FetchSchema_with_a_schema_not_found(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
 	}))
@@ -86,7 +86,7 @@ func Test_Client_FetchSchema_whith_a_schema_not_found(t *testing.T) {
 	assert.EqualError(t, err, "not found: schema foobar/1 not found")
 }
 
-func Test_Client_FetchSchema_whith_an_unexpected_error(t *testing.T) {
+func Test_Client_FetchSchema_with_an_unexpected_error(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusTeapot)
 	}))
