@@ -1,4 +1,5 @@
 [![license](http://img.shields.io/badge/license-Apache%20v2-orange.svg)](https://raw.githubusercontent.com/Peltoche/oaichecker/master/LICENSE)
+[![Build Status](https://travis-ci.org/Peltoche/avro-gateway.svg?branch=master)](https://travis-ci.org/Peltoche/avro-gateway)
 
 # Avro Gateway
 
