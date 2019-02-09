@@ -45,7 +45,10 @@ func (t *InMemory) GetClientByID(ctx context.Context, clientID string) (*model.C
 	t.mutex.RLock()
 	defer t.mutex.RUnlock()
 
-	client := t.clients[clientID]
+	client, present := t.clients[clientID]
+	if !present {
+		return nil, nil
+	}
 
 	return &client, nil
 }

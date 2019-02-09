@@ -30,6 +30,15 @@ func Test_InMemory_RegisterNewClient_GetClientByID_success(t *testing.T) {
 	assert.EqualValues(t, &client, res)
 }
 
+func Test_InMemory_GetClientByID_with_client_not_found(t *testing.T) {
+	storage := NewInMemory()
+
+	res, err := storage.GetClientByID(context.Background(), "some-unknown-id")
+
+	require.NoError(t, err)
+	assert.Nil(t, res)
+}
+
 func Test_InMemory_RegisterNewClient_twice(t *testing.T) {
 	client := model.Client{
 		ID:          "some-id",
