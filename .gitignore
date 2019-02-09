@@ -1,4 +1,4 @@
-schema-gateway
+avro-gateway
 coverage.out
 vendor/
 *.cov
