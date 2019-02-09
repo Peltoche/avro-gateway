@@ -26,6 +26,7 @@ type Registry interface {
 // Storage used to persiste the clients state.
 type Storage interface {
 	RegisterNewClient(ctx context.Context, client *model.Client) error
+	GetAllClientsOnTopic(ctx context.Context, topicName string) ([]model.Client, error)
 }
 
 // NewUsecase instantiate a new Usecase.
@@ -60,6 +61,16 @@ func (t *Usecase) GetSchema(ctx context.Context, cmd *GetSchemaCmd) (string, err
 		return "", internal.Wrap(err, "failed to fetch the schema")
 	}
 
+	clientsOnTopic, err := t.storage.GetAllClientsOnTopic(ctx, cmd.Topic)
+	if err != nil {
+		return "", internal.Wrapf(err, "failed to retrieve the list of clients connected to the topic %q", cmd.Topic)
+	}
+
+	err = t.checkSubjectCompatibility(cmd, clientsOnTopic)
+	if err != nil {
+		return "", err
+	}
+
 	client := model.Client{
 		ID:          t.generateUUID(),
 		Topic:       cmd.Topic,
@@ -75,6 +86,22 @@ func (t *Usecase) GetSchema(ctx context.Context, cmd *GetSchemaCmd) (string, err
 	}
 
 	return schema, nil
+}
+
+func (t *Usecase) checkSubjectCompatibility(cmd *GetSchemaCmd, clientsOnTopic []model.Client) error {
+	for _, client := range clientsOnTopic {
+		if cmd.Subject != client.Subject {
+			return internal.Errorf(
+				internal.BadRequest,
+				`invalid subject: you can't use the subject %q because the application %q use the schema "%s/%s"`,
+				cmd.Subject,
+				client.Application,
+				client.Subject,
+				client.Version)
+		}
+	}
+
+	return nil
 }
 
 func (t *Usecase) validateGetSchemaCmd(cmd *GetSchemaCmd) error {

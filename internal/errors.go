@@ -22,6 +22,8 @@ var (
 	NotFound ErrorKind = "not found"
 	// InvalidJSONBody is returned when the server failed to decode the request body.
 	InvalidJSONBody ErrorKind = "invalid json body"
+	// BadRequest is returned when the client request is invalid.
+	BadRequest ErrorKind = "bad request"
 )
 
 // Error returned a the differents components.
@@ -69,7 +71,7 @@ func Wrap(err error, msg string) error {
 
 // Wrapf the given formated message into a new error message
 func Wrapf(err error, msg string, args ...interface{}) error {
-	formattedMsg := fmt.Sprintf("%s: %s", msg, err.Error())
+	formattedMsg := fmt.Sprintf(msg, args...)
 
 	innerError, ok := err.(*Error)
 	if !ok {

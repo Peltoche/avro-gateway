@@ -21,6 +21,7 @@ func Test_Usecase_GetSchema_success(t *testing.T) {
 	usecase.generateUUID = func() string { return "some-id" }
 
 	registryMock.On("FetchSchema", "foobar", "1").Return("some-schema", nil).Once()
+	storageMock.On("GetAllClientsOnTopic", "some-topic").Return([]model.Client{}, nil).Once()
 	storageMock.On("RegisterNewClient", &model.Client{
 		ID:          "some-id",
 		Topic:       "some-topic",
@@ -89,6 +90,67 @@ func Test_Usecase_GetSchema_with_a_fetch_schema_error(t *testing.T) {
 	storageMock.AssertExpectations(t)
 }
 
+func Test_Usecase_GetSchema_with_GetAllClientOnTopic_error(t *testing.T) {
+	registryMock := new(registry.Mock)
+	storageMock := new(storage.Mock)
+
+	usecase := NewUsecase(registryMock, storageMock)
+	usecase.generateUUID = func() string { return "some-id" }
+
+	registryMock.On("FetchSchema", "foobar", "1").Return("some-schema", nil).Once()
+	storageMock.On("GetAllClientsOnTopic", "some-topic").Return([]model.Client{}, errors.New("some-error")).Once()
+
+	schema, err := usecase.GetSchema(context.Background(), &GetSchemaCmd{
+		Topic:       "some-topic",
+		Application: "my-application",
+		Action:      "read",
+		Subject:     "foobar",
+		Version:     "1",
+	})
+
+	assert.Empty(t, schema)
+	assert.EqualError(t, err, `internal error: failed to retrieve the list of clients connected to the topic "some-topic": some-error`)
+
+	registryMock.AssertExpectations(t)
+	storageMock.AssertExpectations(t)
+}
+
+func Test_Usecase_GetSchema_with_in_incompatible_subject(t *testing.T) {
+	registryMock := new(registry.Mock)
+	storageMock := new(storage.Mock)
+
+	usecase := NewUsecase(registryMock, storageMock)
+	usecase.generateUUID = func() string { return "some-id" }
+
+	registryMock.On("FetchSchema", "foobar", "1").Return("some-schema", nil).Once()
+	storageMock.On("GetAllClientsOnTopic", "some-topic").Return([]model.Client{
+		{
+			ID: "some-other-id",
+			// Same topic
+			Topic:       "some-topic",
+			Application: "an-other-application",
+			Action:      "read",
+			// Some other subject
+			Subject: "an-other-subject",
+			Version: "1",
+		},
+	}, nil).Once()
+
+	schema, err := usecase.GetSchema(context.Background(), &GetSchemaCmd{
+		Topic:       "some-topic",
+		Application: "my-application",
+		Action:      "read",
+		Subject:     "foobar",
+		Version:     "1",
+	})
+
+	assert.Empty(t, schema)
+	assert.EqualError(t, err, `bad request: invalid subject: you can't use the subject "foobar" because the application "an-other-application" use the schema "an-other-subject/1"`)
+
+	registryMock.AssertExpectations(t)
+	storageMock.AssertExpectations(t)
+}
+
 func Test_Usecase_GetSchema_with_a_register_client_error(t *testing.T) {
 	registryMock := new(registry.Mock)
 	storageMock := new(storage.Mock)
@@ -97,6 +159,7 @@ func Test_Usecase_GetSchema_with_a_register_client_error(t *testing.T) {
 	usecase.generateUUID = func() string { return "some-id" }
 
 	registryMock.On("FetchSchema", "foobar", "1").Return("some-schema", nil).Once()
+	storageMock.On("GetAllClientsOnTopic", "some-topic").Return([]model.Client{}, nil).Once()
 	storageMock.On("RegisterNewClient", &model.Client{
 		ID:          "some-id",
 		Topic:       "some-topic",
