@@ -5,8 +5,11 @@ import (
 	"errors"
 	"testing"
 
+	"github.com/Peltoche/avro-gateway/internal"
+	"github.com/Peltoche/avro-gateway/model"
 	"github.com/Peltoche/avro-gateway/registry"
 	"github.com/Peltoche/avro-gateway/storage"
+	uuid "github.com/satori/go.uuid"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -15,8 +18,17 @@ func Test_Usecase_GetSchema_success(t *testing.T) {
 	storageMock := new(storage.Mock)
 
 	usecase := NewUsecase(registryMock, storageMock)
+	usecase.generateUUID = func() string { return "some-id" }
 
 	registryMock.On("FetchSchema", "foobar", "1").Return("some-schema", nil).Once()
+	storageMock.On("RegisterNewClient", &model.Client{
+		ID:          "some-id",
+		Topic:       "some-topic",
+		Application: "my-application",
+		Action:      "read",
+		Subject:     "foobar",
+		Version:     "1",
+	}).Return(nil).Once()
 
 	schema, err := usecase.GetSchema(context.Background(), &GetSchemaCmd{
 		Topic:       "some-topic",
@@ -71,6 +83,38 @@ func Test_Usecase_GetSchema_with_a_fetch_schema_error(t *testing.T) {
 	})
 
 	assert.EqualError(t, err, "internal error: failed to fetch the schema: some-error")
+	assert.Empty(t, schema)
+
+	registryMock.AssertExpectations(t)
+	storageMock.AssertExpectations(t)
+}
+
+func Test_Usecase_GetSchema_with_a_register_client_error(t *testing.T) {
+	registryMock := new(registry.Mock)
+	storageMock := new(storage.Mock)
+
+	usecase := NewUsecase(registryMock, storageMock)
+	usecase.generateUUID = func() string { return "some-id" }
+
+	registryMock.On("FetchSchema", "foobar", "1").Return("some-schema", nil).Once()
+	storageMock.On("RegisterNewClient", &model.Client{
+		ID:          "some-id",
+		Topic:       "some-topic",
+		Application: "my-application",
+		Action:      "read",
+		Subject:     "foobar",
+		Version:     "1",
+	}).Return(internal.NewError(internal.InternalError, "some-error")).Once()
+
+	schema, err := usecase.GetSchema(context.Background(), &GetSchemaCmd{
+		Topic:       "some-topic",
+		Application: "my-application",
+		Action:      "read",
+		Subject:     "foobar",
+		Version:     "1",
+	})
+
+	assert.EqualError(t, err, "internal error: failed to register the client: some-error")
 	assert.Empty(t, schema)
 
 	registryMock.AssertExpectations(t)
@@ -157,4 +201,12 @@ func Test_Usecase_validateGetSchemaCmd(t *testing.T) {
 			}
 		})
 	}
+}
+
+func Test_Usecase_generateUUID_is_a_valid_uuid(t *testing.T) {
+	usecase := NewUsecase(nil, nil)
+
+	res := usecase.generateUUID()
+
+	assert.NotNil(t, uuid.FromStringOrNil(res))
 }

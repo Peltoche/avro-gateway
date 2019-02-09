@@ -2,7 +2,9 @@ package storage
 
 import (
 	"context"
+	"sync"
 
+	"github.com/Peltoche/avro-gateway/internal"
 	"github.com/Peltoche/avro-gateway/model"
 )
 
@@ -12,16 +14,38 @@ import (
 // have any persistence!
 type InMemory struct {
 	clients map[string]model.Client
+	mutex   *sync.RWMutex
 }
 
 // NewInMemory instanciate a new InMemory.
 func NewInMemory() *InMemory {
 	return &InMemory{
 		clients: map[string]model.Client{},
+		mutex:   new(sync.RWMutex),
 	}
 }
 
 // RegisterNewClient register a new Client into the list of clients.
 func (t *InMemory) RegisterNewClient(ctx context.Context, client *model.Client) error {
+	t.mutex.Lock()
+	defer t.mutex.Unlock()
+
+	_, taken := t.clients[client.ID]
+	if taken {
+		return internal.Errorf(internal.InternalError, "storage conflict: try to register client %q twice", client.ID)
+	}
+
+	t.clients[client.ID] = *client
+
 	return nil
+}
+
+// GetClientByID retrieve the client matching the id.
+func (t *InMemory) GetClientByID(ctx context.Context, clientID string) (*model.Client, error) {
+	t.mutex.RLock()
+	defer t.mutex.RUnlock()
+
+	client := t.clients[clientID]
+
+	return &client, nil
 }

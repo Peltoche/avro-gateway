@@ -6,12 +6,16 @@ import (
 
 	"github.com/Peltoche/avro-gateway/internal"
 	"github.com/Peltoche/avro-gateway/model"
+	uuid "github.com/satori/go.uuid"
 )
 
 // Usecase handling all the logic about the schema resource.
 type Usecase struct {
 	registry Registry
 	storage  Storage
+	// Set the uuid generation function as an attribute in order to be able to
+	// mock id.
+	generateUUID func() string
 }
 
 // Registry is used to fetch schema from any Schema Registry.
@@ -29,6 +33,9 @@ func NewUsecase(registry Registry, storage Storage) *Usecase {
 	return &Usecase{
 		registry: registry,
 		storage:  storage,
+		generateUUID: func() string {
+			return uuid.NewV4().String()
+		},
 	}
 }
 
@@ -51,6 +58,20 @@ func (t *Usecase) GetSchema(ctx context.Context, cmd *GetSchemaCmd) (string, err
 	schema, err := t.registry.FetchSchema(ctx, cmd.Subject, cmd.Version)
 	if err != nil {
 		return "", internal.Wrap(err, "failed to fetch the schema")
+	}
+
+	client := model.Client{
+		ID:          t.generateUUID(),
+		Topic:       cmd.Topic,
+		Application: cmd.Application,
+		Action:      cmd.Action,
+		Subject:     cmd.Subject,
+		Version:     cmd.Version,
+	}
+
+	err = t.storage.RegisterNewClient(ctx, &client)
+	if err != nil {
+		return "", internal.Wrap(err, "failed to register the client")
 	}
 
 	return schema, nil
