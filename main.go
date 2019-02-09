@@ -13,7 +13,7 @@ import (
 const addr = ":8080"
 
 func main() {
-	r := mux.NewRouter()
+	router := mux.NewRouter()
 
 	schemaRegistryURL, err := url.Parse("http://localhost:8081")
 	if err != nil {
@@ -26,10 +26,10 @@ func main() {
 	// Schema.
 	schemaUsecase := schema.NewUsecase(registry)
 	schemaHandler := schema.NewHTTPHandler(schemaUsecase)
-	schemaHandler.RegisterRoutes(r.PathPrefix("/schemas").Subrouter())
+	schemaHandler.RegisterRoutes(router)
 
 	log.Printf("start listening on %s", addr)
-	err = http.ListenAndServe(addr, r)
+	err = http.ListenAndServe(addr, router)
 	if err != nil {
 		log.Fatal(err)
 	}

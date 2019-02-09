@@ -31,7 +31,7 @@ func NewHTTPHandler(usecase usecase) *HTTPHandler {
 
 // RegisterRoutes into the givem mux.Router.
 func (t *HTTPHandler) RegisterRoutes(router *mux.Router) {
-	router.HandleFunc("/{subject}", t.Post).Methods("POST")
+	router.HandleFunc("/schemas/{subject}", t.Post).Methods("POST")
 }
 
 // Post /schemas/{subject}
