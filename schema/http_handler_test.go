@@ -20,14 +20,19 @@ func Test_HTTPHandler_Post_success(t *testing.T) {
 	handler := NewHTTPHandler(usecaseMock)
 
 	usecaseMock.On("GetSchema", &GetSchemaCmd{
-		Subject: "foobar",
-		Action:  "read",
-		Version: "1",
+		Topic:       "my-topic",
+		Application: "my-application",
+		Action:      "read",
+		Subject:     "my-avro-subject",
+		Version:     "1",
 	}).Return("some-schema", nil).Once()
 
 	w := httptest.NewRecorder()
-	r := httptest.NewRequest("POST", "http://example.com/foobar", strings.NewReader(`{
+	r := httptest.NewRequest("POST", "http://example.com/schema", strings.NewReader(`{
+		"topic": "my-topic",
+		"application": "my-application",
 		"action": "read",
+		"subject": "my-avro-subject",
 		"version": "1"
 	}`))
 
@@ -51,7 +56,7 @@ func Test_HTTPHandler_Post_with_an_invalid_body_format(t *testing.T) {
 	handler := NewHTTPHandler(usecaseMock)
 
 	w := httptest.NewRecorder()
-	r := httptest.NewRequest("POST", "http://example.com/foobar", strings.NewReader("invalid json"))
+	r := httptest.NewRequest("POST", "http://example.com/schema", strings.NewReader("invalid json"))
 
 	router := mux.NewRouter()
 	handler.RegisterRoutes(router)
@@ -76,15 +81,20 @@ func Test_HTTPHandler_Post_with_an_error_from_the_usecase(t *testing.T) {
 	handler := NewHTTPHandler(usecaseMock)
 
 	usecaseMock.On("GetSchema", &GetSchemaCmd{
-		Subject: "foobar",
-		Action:  "read",
-		Version: "1",
+		Topic:       "my-topic",
+		Application: "my-application",
+		Action:      "read",
+		Subject:     "my-avro-subject",
+		Version:     "-1",
 	}).Return("", internal.NewError(internal.ValidationError, "some-message")).Once()
 
 	w := httptest.NewRecorder()
-	r := httptest.NewRequest("POST", "http://example.com/foobar", strings.NewReader(`{
+	r := httptest.NewRequest("POST", "http://example.com/schema", strings.NewReader(`{
+		"topic": "my-topic",
+		"application": "my-application",
 		"action": "read",
-		"version": "1"
+		"subject": "my-avro-subject",
+		"version": "-1"
 	}`))
 
 	router := mux.NewRouter()
@@ -110,14 +120,19 @@ func Test_HTTPHandler_Post_with_an_unexpected_error_from_the_usecase(t *testing.
 	handler := NewHTTPHandler(usecaseMock)
 
 	usecaseMock.On("GetSchema", &GetSchemaCmd{
-		Subject: "foobar",
-		Action:  "read",
-		Version: "1",
+		Topic:       "my-topic",
+		Application: "my-application",
+		Action:      "read",
+		Subject:     "my-avro-subject",
+		Version:     "1",
 	}).Return("", errors.New("some-unexpected-message")).Once()
 
 	w := httptest.NewRecorder()
-	r := httptest.NewRequest("POST", "http://example.com/foobar", strings.NewReader(`{
+	r := httptest.NewRequest("POST", "http://example.com/schema", strings.NewReader(`{
+		"topic": "my-topic",
+		"application": "my-application",
 		"action": "read",
+		"subject": "my-avro-subject",
 		"version": "1"
 	}`))
 

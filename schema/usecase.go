@@ -26,9 +26,11 @@ func NewUsecase(registry Registry) *Usecase {
 
 // GetSchemaCmd is the requests parameters for the GetSchema method.
 type GetSchemaCmd struct {
-	Action  string
-	Subject string
-	Version string
+	Topic       string
+	Application string
+	Action      string
+	Subject     string
+	Version     string
 }
 
 // GetSchema check if the client is authorized to use the schema and return it.
@@ -61,6 +63,16 @@ func (t *Usecase) validateGetSchemaCmd(cmd *GetSchemaCmd) error {
 	// Parse the "Subject" field.
 	if cmd.Subject == "" {
 		return internal.NewError(internal.ValidationError, `missing field "subject"`)
+	}
+
+	// Parse the "Application" field.
+	if cmd.Application == "" {
+		return internal.NewError(internal.ValidationError, `missing field "application"`)
+	}
+
+	// Parse the "Topic" field.
+	if cmd.Topic == "" {
+		return internal.NewError(internal.ValidationError, `missing field "topic"`)
 	}
 
 	// Parse the "Action" field.

@@ -31,17 +31,18 @@ func NewHTTPHandler(usecase usecase) *HTTPHandler {
 
 // RegisterRoutes into the givem mux.Router.
 func (t *HTTPHandler) RegisterRoutes(router *mux.Router) {
-	router.HandleFunc("/schemas/{subject}", t.Post).Methods("POST")
+	router.HandleFunc("/schema", t.Post).Methods("POST")
 }
 
 // Post /schemas/{subject}
 func (t *HTTPHandler) Post(w http.ResponseWriter, r *http.Request) {
 	type request struct {
-		Version string `json:"version"`
-		Action  string `json:"action"`
+		Topic       string `json:"topic"`
+		Application string `json:"application"`
+		Version     string `json:"version"`
+		Subject     string `json:"subject"`
+		Action      string `json:"action"`
 	}
-
-	vars := mux.Vars(r)
 
 	var req request
 	err := json.NewDecoder(r.Body).Decode(&req)
@@ -51,9 +52,11 @@ func (t *HTTPHandler) Post(w http.ResponseWriter, r *http.Request) {
 	}
 
 	schema, err := t.usecase.GetSchema(r.Context(), &GetSchemaCmd{
-		Action:  req.Action,
-		Subject: vars["subject"],
-		Version: req.Version,
+		Topic:       req.Topic,
+		Application: req.Application,
+		Action:      req.Action,
+		Subject:     req.Subject,
+		Version:     req.Version,
 	})
 	if err != nil {
 		internal.WriteErrorIntoResponse(w, err)
