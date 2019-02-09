@@ -2,8 +2,8 @@ package registry
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 
@@ -26,13 +26,7 @@ func NewClient(schemaRegistryURL *url.URL) *Client {
 
 // FetchSchema corresponding to the subject/version.
 func (t *Client) FetchSchema(ctx context.Context, subject string, version string) (string, error) {
-	type response struct {
-		Name    string `json:"name"`
-		Version int    `json:"version"`
-		Schema  string `json:"schema"`
-	}
-
-	fetchSchemaPath, err := url.Parse(fmt.Sprintf("/subjects/%s/versions/%s", subject, version))
+	fetchSchemaPath, err := url.Parse(fmt.Sprintf("/subjects/%s/versions/%s/schema", subject, version))
 	if err != nil {
 		return "", internal.Errorf(internal.InternalError, "failed to generate the path: %s", err)
 	}
@@ -56,11 +50,10 @@ func (t *Client) FetchSchema(ctx context.Context, subject string, version string
 		return "", internal.Errorf(internal.RemoteError, "unexpected response status: %s", res.Status)
 	}
 
-	var resBody response
-	err = json.NewDecoder(res.Body).Decode(&resBody)
+	rawSchema, err := ioutil.ReadAll(res.Body)
 	if err != nil {
-		return "", internal.Errorf(internal.RemoteError, "invalid response body format: %s", err)
+		return "", internal.Errorf(internal.RemoteError, "failed to read the response body: %s", err)
 	}
 
-	return resBody.Schema, nil
+	return string(rawSchema), nil
 }

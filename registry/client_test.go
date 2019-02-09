@@ -15,10 +15,14 @@ func Test_Client_FetchSchema_Success(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		_, err := w.Write([]byte(`{
-		"subject":"foobar",
-		"version":1,
-		"id":1,
-		"schema":"{ \"type\": \"record\", \"name\": \"Person\", \"namespace\": \"com.ippontech.kafkatutorials\", \"fields\": [ { \"name\": \"firstName\", \"type\": \"string\" }, { \"name\": \"lastName\", \"type\": \"string\" }, { \"name\": \"birthDate\", \"type\": \"long\" } ]}" }"
+			"type": "record",
+			"name": "Person",
+			"namespace": "com.ippontech.kafkatutorials",
+			"fields": [
+				{ "name": "firstName", "type": "string" },
+				{ "name": "lastName", "type": "string" },
+				{ "name": "birthDate", "type": "long" }
+			]
 		}`))
 		require.NoError(t, err)
 	}))
@@ -52,7 +56,7 @@ func Test_Client_FetchSchema_with_path_error(t *testing.T) {
 	// Subject invalid in path
 	schema, err := client.FetchSchema(context.Background(), "%gh&%ij", "1")
 
-	assert.EqualError(t, err, "internal error: failed to generate the path: parse /subjects/%gh&%ij/versions/1: invalid URL escape \"%gh\"")
+	assert.EqualError(t, err, "internal error: failed to generate the path: parse /subjects/%gh&%ij/versions/1/schema: invalid URL escape \"%gh\"")
 	assert.Empty(t, schema)
 }
 
@@ -65,7 +69,7 @@ func Test_Client_FetchSchema_with_a_network_error(t *testing.T) {
 	// Subject invalid in path
 	schema, err := client.FetchSchema(context.Background(), "foobar", "1")
 
-	assert.EqualError(t, err, "remote error: Get /subjects/foobar/versions/1: unsupported protocol scheme \"\"")
+	assert.EqualError(t, err, "remote error: Get /subjects/foobar/versions/1/schema: unsupported protocol scheme \"\"")
 	assert.Empty(t, schema)
 }
 
@@ -101,23 +105,4 @@ func Test_Client_FetchSchema_with_an_unexpected_error(t *testing.T) {
 
 	assert.Empty(t, schema)
 	assert.EqualError(t, err, "remote error: unexpected response status: 418 I'm a teapot")
-}
-
-func Test_Client_FetchSchema_with_an_invalid_response_body(t *testing.T) {
-	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusOK)
-		_, err := w.Write([]byte(`not a json response`))
-		require.NoError(t, err)
-	}))
-	defer ts.Close()
-
-	registryURL, err := url.Parse(ts.URL)
-	require.NoError(t, err)
-
-	client := NewClient(registryURL)
-
-	schema, err := client.FetchSchema(context.Background(), "foobar", "1")
-
-	assert.Empty(t, schema)
-	assert.EqualError(t, err, "remote error: invalid response body format: invalid character 'o' in literal null (expecting 'u')")
 }
