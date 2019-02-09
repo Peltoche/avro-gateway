@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/Peltoche/schema-gateway/internal"
+	"github.com/Peltoche/avro-gateway/internal"
 	"github.com/gorilla/mux"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

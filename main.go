@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/Peltoche/schema-gateway/registry"
-	"github.com/Peltoche/schema-gateway/schema"
+	"github.com/Peltoche/avro-gateway/registry"
+	"github.com/Peltoche/avro-gateway/schema"
 	"github.com/gorilla/mux"
 )
 

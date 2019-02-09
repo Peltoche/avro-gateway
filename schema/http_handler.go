@@ -6,7 +6,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/Peltoche/schema-gateway/internal"
+	"github.com/Peltoche/avro-gateway/internal"
 	"github.com/gorilla/mux"
 )
 

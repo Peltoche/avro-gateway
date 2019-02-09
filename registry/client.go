@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/Peltoche/schema-gateway/internal"
+	"github.com/Peltoche/avro-gateway/internal"
 )
 
 // Client handle all the interaction between the service and the Schema .

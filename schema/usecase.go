@@ -4,7 +4,7 @@ import (
 	"context"
 	"strconv"
 
-	"github.com/Peltoche/schema-gateway/internal"
+	"github.com/Peltoche/avro-gateway/internal"
 )
 
 // Usecase handling all the logic about the schema resource.

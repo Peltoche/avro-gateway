@@ -5,7 +5,7 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/Peltoche/schema-gateway/registry"
+	"github.com/Peltoche/avro-gateway/registry"
 	"github.com/stretchr/testify/assert"
 )
 
