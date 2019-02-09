@@ -7,6 +7,7 @@ import (
 
 	"github.com/Peltoche/avro-gateway/registry"
 	"github.com/Peltoche/avro-gateway/schema"
+	"github.com/Peltoche/avro-gateway/storage"
 	"github.com/gorilla/mux"
 )
 
@@ -22,9 +23,10 @@ func main() {
 
 	// Clients.
 	registry := registry.NewClient(schemaRegistryURL)
+	inMemorystorage := storage.NewInMemory()
 
 	// Schema.
-	schemaUsecase := schema.NewUsecase(registry)
+	schemaUsecase := schema.NewUsecase(registry, inMemorystorage)
 	schemaHandler := schema.NewHTTPHandler(schemaUsecase)
 	schemaHandler.RegisterRoutes(router)
 

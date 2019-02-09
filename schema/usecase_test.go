@@ -6,13 +6,15 @@ import (
 	"testing"
 
 	"github.com/Peltoche/avro-gateway/registry"
+	"github.com/Peltoche/avro-gateway/storage"
 	"github.com/stretchr/testify/assert"
 )
 
 func Test_Usecase_GetSchema_success(t *testing.T) {
 	registryMock := new(registry.Mock)
+	storageMock := new(storage.Mock)
 
-	usecase := NewUsecase(registryMock)
+	usecase := NewUsecase(registryMock, storageMock)
 
 	registryMock.On("FetchSchema", "foobar", "1").Return("some-schema", nil).Once()
 
@@ -28,12 +30,14 @@ func Test_Usecase_GetSchema_success(t *testing.T) {
 	assert.Equal(t, "some-schema", schema)
 
 	registryMock.AssertExpectations(t)
+	storageMock.AssertExpectations(t)
 }
 
 func Test_Usecase_GetSchema_with_a_schema_validation_error(t *testing.T) {
 	registryMock := new(registry.Mock)
+	storageMock := new(storage.Mock)
 
-	usecase := NewUsecase(registryMock)
+	usecase := NewUsecase(registryMock, storageMock)
 
 	schema, err := usecase.GetSchema(context.Background(), &GetSchemaCmd{
 		Topic:       "some-topic",
@@ -47,12 +51,14 @@ func Test_Usecase_GetSchema_with_a_schema_validation_error(t *testing.T) {
 	assert.Empty(t, schema)
 
 	registryMock.AssertExpectations(t)
+	storageMock.AssertExpectations(t)
 }
 
 func Test_Usecase_GetSchema_with_a_fetch_schema_error(t *testing.T) {
 	registryMock := new(registry.Mock)
+	storageMock := new(storage.Mock)
 
-	usecase := NewUsecase(registryMock)
+	usecase := NewUsecase(registryMock, storageMock)
 
 	registryMock.On("FetchSchema", "foobar", "1").Return("", errors.New("some-error")).Once()
 
@@ -68,6 +74,7 @@ func Test_Usecase_GetSchema_with_a_fetch_schema_error(t *testing.T) {
 	assert.Empty(t, schema)
 
 	registryMock.AssertExpectations(t)
+	storageMock.AssertExpectations(t)
 }
 
 func Test_Usecase_validateGetSchemaCmd(t *testing.T) {
@@ -140,7 +147,7 @@ func Test_Usecase_validateGetSchemaCmd(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.Title, func(tt *testing.T) {
-			usecase := NewUsecase(nil)
+			usecase := NewUsecase(nil, nil)
 
 			err := usecase.validateGetSchemaCmd(&test.Cmd)
 			if test.Err == "" {

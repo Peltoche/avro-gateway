@@ -5,11 +5,13 @@ import (
 	"strconv"
 
 	"github.com/Peltoche/avro-gateway/internal"
+	"github.com/Peltoche/avro-gateway/model"
 )
 
 // Usecase handling all the logic about the schema resource.
 type Usecase struct {
 	registry Registry
+	storage  Storage
 }
 
 // Registry is used to fetch schema from any Schema Registry.
@@ -17,10 +19,16 @@ type Registry interface {
 	FetchSchema(ctx context.Context, subject string, version string) (string, error)
 }
 
+// Storage used to persiste the clients state.
+type Storage interface {
+	RegisterNewClient(ctx context.Context, client *model.Client) error
+}
+
 // NewUsecase instantiate a new Usecase.
-func NewUsecase(registry Registry) *Usecase {
+func NewUsecase(registry Registry, storage Storage) *Usecase {
 	return &Usecase{
 		registry: registry,
+		storage:  storage,
 	}
 }
 
