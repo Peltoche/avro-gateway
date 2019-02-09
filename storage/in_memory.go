@@ -17,7 +17,7 @@ type InMemory struct {
 	mutex   *sync.RWMutex
 }
 
-// NewInMemory instanciate a new InMemory.
+// NewInMemory instantiate a new InMemory.
 func NewInMemory() *InMemory {
 	return &InMemory{
 		clients: map[string]model.Client{},
