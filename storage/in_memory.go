@@ -49,3 +49,18 @@ func (t *InMemory) GetClientByID(ctx context.Context, clientID string) (*model.C
 
 	return &client, nil
 }
+
+// GetAllClientsOnTopic return all the client connected to a given topic.
+func (t *InMemory) GetAllClientsOnTopic(ctx context.Context, topicName string) ([]model.Client, error) {
+	t.mutex.RLock()
+	defer t.mutex.RUnlock()
+
+	res := []model.Client{}
+	for _, client := range t.clients {
+		if client.Topic == topicName {
+			res = append(res, client)
+		}
+	}
+
+	return res, nil
+}
