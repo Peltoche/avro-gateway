@@ -1,5 +1,6 @@
 [![license](http://img.shields.io/badge/license-Apache%20v2-orange.svg)](https://raw.githubusercontent.com/Peltoche/oaichecker/master/LICENSE)
 [![Build Status](https://travis-ci.org/Peltoche/avro-gateway.svg?branch=master)](https://travis-ci.org/Peltoche/avro-gateway)
+[![codecov](https://codecov.io/gh/Peltoche/avro-gateway/branch/master/graph/badge.svg)](https://codecov.io/gh/Peltoche/avro-gateway)
 [![Go Report Card](https://goreportcard.com/badge/github.com/Peltoche/avro-gateway)](https://goreportcard.com/report/github.com/Peltoche/avro-gateway)
 
 # Avro Gateway
